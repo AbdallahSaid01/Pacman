@@ -1,16 +1,20 @@
 // Author: Patricia Terol
 // Course: CSE 2050
 // Project: assign10
+// Edited to be VaxMan by Abdallah Said
 
 #include <stdlib.h>
 #include <vector>
 #include <deque>
+#include <iterator>
+#include <list>
 #include <windows.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <iostream>
 #include <string>
 #define _USE_MATH_DEFINES
 #include <math.h>
+
 using namespace std;
 
 static bool replay = false; //check if starts a new game
@@ -19,11 +23,12 @@ static float squareSize = 50.0; //size of one square on the game
 static float xIncrement = 0; // x movement on pacman
 static float yIncrement = 0; // y movement on pacman
 static int rotation = 0; // orientation of pacman
-float* monster1 = new float[3] {10.5, 8.5, 1.0}; //coordinates and direction of first monster
-float* monster2 = new float[3] {13.5, 1.5, 2.0}; //coordinates and direction of second monster
-float* monster3 = new float[3] {4.5, 6.5, 3.0}; //coordinates and direction of third monster
-float* monster4 = new float[3] {2.5, 13.5, 4.0}; //coordinates and direction of fourth monster
+list<float*> monster1; // = new float[3]{ 10.5, 8.5, 1.0 }; //coordinates and direction of first monster
+list<float*> monster2; // = new float[3]{ 13.5, 1.5, 2.0 }; //coordinates and direction of second monster
+list<float*> monster3; // = new float[3]{ 4.5, 6.5, 3.0 }; //coordinates and direction of third monster
+list<float*> monster4; // = new float[3]{ 2.5, 13.5, 4.0 }; //coordinates and direction of fourth monster
 static vector<int> border = { 0, 0, 15, 1, 15, 15, 14, 1, 0, 14, 15, 15, 1, 14, 0, 0 }; //coordinates of the border walls
+int now = glutGet(GLUT_ELAPSED_TIME);
 
 //coordinates of the obstacles (divided into 3 for clarity)
 static vector<int> obstaclesTop = { 2, 2, 3, 6, 3, 6, 4, 5, 4, 2, 5, 4, 5, 3, 6, 5, 6, 1, 9, 2, 7, 2, 8, 5, 9, 5, 10, 3, 10, 4, 11, 2, 11, 5, 12, 6, 12, 6, 13, 2 };
@@ -59,6 +64,10 @@ void init(void){
 	bitmap.push_back({ true, false, true, true, true, true, false, true, true, false, true, true, true, false, true });
 	bitmap.push_back({ true, false, false, false, false, false, false, false, false, false, false, false, false, false, true });
 	bitmap.push_back({ true, true, true, true, true, true, true, true, true, true, true, true, true, true, true });
+	monster1.push_back(new float[3]{ 10.5, 8.5, 1.0 });
+	monster2.push_back(new float[3]{ 13.5, 1.5, 2.0 });
+	monster3.push_back(new float[3]{ 4.5, 6.5, 3.0 });
+	monster4.push_back(new float[3]{ 2.5, 13.5, 4.0 });
 }
 
 //Method to draw the obstacle course and the walls
@@ -236,10 +245,14 @@ void resetGame(){
 	xIncrement = 0;
 	yIncrement = 0; 
 	rotation = 0;
-	monster1 = new float[3] {10.5, 8.5, 1.0};
-	monster2 = new float[3] {13.5, 1.5, 2.0};
-	monster3 = new float[3] {4.5, 6.5, 3.0};
-	monster4 = new float[3] {2.5, 13.5, 4.0};
+	monster1.clear();
+	monster2.clear();
+	monster3.clear();
+	monster4.clear();
+	monster1.push_back(new float[3]{ 10.5, 8.5, 1.0 });
+	monster2.push_back(new float[3]{ 13.5, 1.5, 2.0 });
+	monster3.push_back(new float[3]{ 4.5, 6.5, 3.0 });
+	monster4.push_back(new float[3]{ 2.5, 13.5, 4.0 });
 	points = 0;
 	for (int i = 0; i < 256; i++){
 		keyStates[i] = false;
@@ -300,36 +313,86 @@ void keyOperations(){
 void gameOver(){
 	int pacmanX = (int)(1.5 + xIncrement);
 	int pacmanY = (int)(1.5 + yIncrement);
-	int monster1X = (int)(monster1[0]);
-	int monster1Y = (int)(monster1[1]);
-	int monster2X = (int)(monster2[0]);
-	int monster2Y = (int)(monster2[1]);
-	int monster3X = (int)(monster3[0]);
-	int monster3Y = (int)(monster3[1]);
-	int monster4X = (int)(monster4[0]);
-	int monster4Y = (int)(monster4[1]);
-	if (pacmanX == monster1X && pacmanY == monster1Y){
+	if (!monster1.empty()) {
+		list<float*>::iterator it = monster1.begin();
+		while (it != monster1.end()) {
+
+			if (pacmanX == (int)**it && pacmanY == (int)*(*it + 1)) {
+				monster1.erase(it++);
+			}
+			else
+				++it;
+		}
+	}	
+	if (!monster2.empty()) {
+		list<float*>::iterator it = monster2.begin();
+		while (it != monster2.end()) {
+			if (pacmanX == (int)**it && pacmanY == (int)*(*it + 1)) {
+				monster2.erase(it++);
+			}
+			else
+				++it;
+		}
+	}	
+	if (!monster3.empty()) {
+		list<float*>::iterator it = monster3.begin();
+		while (it != monster3.end()) {
+			if (pacmanX == (int)**it && pacmanY == (int)*(*it + 1)) {
+				monster3.erase(it++);
+			}
+			else
+				++it;
+		}
+	}	
+	if (!monster4.empty()) {
+		list<float*>::iterator it = monster4.begin();
+		while (it != monster4.end()) {
+			if (pacmanX == (int)**it && pacmanY == (int)*(*it + 1)) {
+				monster4.erase(it++);
+			}
+			else
+				++it;
+		}
+	}
+	if (monster1.size() + monster2.size() + monster3.size() + monster4.size() >= 32 * 4) {
 		over = true;
 	}
-	if (pacmanX == monster2X && pacmanY == monster2Y){
+
+	if (points == 106) {
 		over = true;
 	}
-	if (pacmanX == monster3X && pacmanY == monster3Y){
-		over = true;
-	}
-	if (pacmanX == monster4X && pacmanY == monster4Y){
-		over = true;
-	}
-	if (points == 106){
-		over = true;
-	}
+		
+
+	//int monster1X = (int)(monster1[0]);
+	//int monster1Y = (int)(monster1[1]);
+	//int monster2X = (int)(monster2[0]);
+	//int monster2Y = (int)(monster2[1]);
+	//int monster3X = (int)(monster3[0]);
+	//int monster3Y = (int)(monster3[1]);
+	//int monster4X = (int)(monster4[0]);
+	//int monster4Y = (int)(monster4[1]);
+	//if (pacmanX == monster1X && pacmanY == monster1Y){
+	//	over = true;
+	//}
+	//if (pacmanX == monster2X && pacmanY == monster2Y){
+	//	over = true;
+	//}
+	//if (pacmanX == monster3X && pacmanY == monster3Y){
+	//	over = true;
+	//}
+	//if (pacmanX == monster4X && pacmanY == monster4Y){
+	//	over = true;
+	//}
+	//if (points == 106){
+	//	over = true;
+	//}
 }
 
 //Method to display the results of the game at the ends
 void resultsDisplay(){
 	if (points == 106){
 		//Won
-		char* message = "*************************************";
+		const char* message = "*************************************";
 		glRasterPos2f(170, 250);
 		while (*message)
 			glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, *message++);
@@ -348,7 +411,7 @@ void resultsDisplay(){
 			glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *message++);
 	}else {
 		//Lost
-		char* message = "*************************";
+		const char* message = "*************************";
 		glRasterPos2f(210, 250);
 		while (*message)
 			glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, *message++);
@@ -384,13 +447,13 @@ void resultsDisplay(){
 //Method to display the starting instructions
 void welcomeScreen(){
 	glClearColor(0, 0.2, 0.4, 1.0);
-	char* message = "*************************************";
+	const char* message = "*************************************";
 	glRasterPos2f(150, 200);
 	while (*message)
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, *message++);
-	message = "PACMAN - by Patricia Terol";
+	message = "VAXMAN - by Abdallah Said forked from PACMAN - by Patricia Terol";
 	glColor3f(1, 1, 1);
-	glRasterPos2f(225, 250);
+	glRasterPos2f(15, 250);
 	while (*message)
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, *message++);
 	message = "*************************************";
@@ -420,14 +483,67 @@ void display(){
 			drawLaberynth();
 			drawFood((1.5 + xIncrement) * squareSize, (1.5 + yIncrement) * squareSize);
 			drawPacman(1.5 + xIncrement, 1.5 + yIncrement, rotation);
-			updateMonster(monster1, 1);
-			updateMonster(monster2, 2);
-			updateMonster(monster3, 3);
-			updateMonster(monster4, 4);
-			drawMonster(monster1[0], monster1[1], 0.0, 1.0, 1.0); //cyan
-			drawMonster(monster2[0], monster2[1], 1.0, 0.0, 0.0); //red
-			drawMonster(monster3[0], monster3[1], 1.0, 0.0, 0.6); //magenta
-			drawMonster(monster4[0], monster4[1], 1.0, 0.3, 0.0); //orange
+			now = glutGet(GLUT_ELAPSED_TIME);
+			if (now % 3000 >= 0 && now % 3000 <= 5) {
+				if (!monster1.empty()) {
+					int currentSize = monster1.size();
+					for (int i = 0; i < currentSize; ++i)
+						monster1.push_back(new float[3]{ 10.5, 8.5, 1.0 });
+				}
+				if (!monster2.empty()) {
+					int currentSize = monster2.size();
+					for (int i = 0; i < currentSize; ++i)
+						monster2.push_back(new float[3]{ 13.5, 1.5, 2.0 });
+				}
+				if (!monster3.empty()) {
+					int currentSize = monster3.size();
+					for (int i = 0; i < currentSize; ++i)
+						monster3.push_back(new float[3]{ 4.5, 6.5, 3.0 });
+				}
+				if (monster4.empty()) {
+					int currentSize = monster4.size();
+					for (int i = 0; i < currentSize; ++i)
+						monster4.push_back(new float[3]{ 2.5, 13.5, 4.0 });
+				}
+				
+			}
+
+			if (!monster1.empty()) {
+				list<float*>::iterator it;
+				for (it = monster1.begin(); it != monster1.end(); ++it) {
+					updateMonster(*it, 1);
+					drawMonster(**it, *(*it + 1), 0.0, 1.0, 1.0);
+				}
+			}	
+			if (!monster2.empty()) {
+				list<float*>::iterator it;
+				for (it = monster2.begin(); it != monster2.end(); ++it) {
+					updateMonster(*it, 2);
+					drawMonster(**it, *(*it + 1), 1.0, 0.0, 0.0);
+				}
+			}
+			if (!monster3.empty()) {
+				list<float*>::iterator it;
+				for (it = monster3.begin(); it != monster3.end(); ++it) {
+					updateMonster(*it, 3);
+					drawMonster(**it, *(*it + 1), 1.0, 0.0, 0.6);
+				}
+			}
+			if (!monster4.empty()) {
+				list<float*>::iterator it;
+				for (it = monster4.begin(); it != monster4.end(); ++it) {
+					updateMonster(*it, 4);
+					drawMonster(**it, *(*it + 1), 1.0, 0.3, 0.0);
+				}
+			}
+			//updateMonster(monster1, 1);
+			//updateMonster(monster2, 2);
+			//updateMonster(monster3, 3);
+			//updateMonster(monster4, 4);
+			//drawMonster(monster1[0], monster1[1], 0.0, 1.0, 1.0); //cyan
+			//drawMonster(monster2[0], monster2[1], 1.0, 0.0, 0.0); //red
+			//drawMonster(monster3[0], monster3[1], 1.0, 0.0, 0.6); //magenta
+			//drawMonster(monster4[0], monster4[1], 1.0, 0.3, 0.0); //orange
 		}
 		else {
 			resultsDisplay();
@@ -457,7 +573,7 @@ int main(int argc, char** argv){
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize(750, 750);
 	glutInitWindowPosition(500, 50);
-	glutCreateWindow("PACMAN - by Patricia Terol");
+	glutCreateWindow("VAXMAN - by Abdallah Said forked from PACMAN - by Patricia Terol");
 
 	//define all the control functions
 	glutDisplayFunc(display);
